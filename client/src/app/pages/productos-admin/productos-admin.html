@@ -1,0 +1,65 @@
+<div class="admin-container">
+  
+  <div class="header">
+    <h2>🍦 Gestión de Helados</h2>
+    <p>Cargá nuevos gustos al sistema.</p>
+  </div>
+
+  <!-- Tarjeta de Carga -->
+  <div class="card-form">
+    <h3>Nuevo Producto</h3>
+    
+    <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+      
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" formControlName="nombre" placeholder="Ej: Tramontana">
+      </div>
+
+      <div class="form-group">
+        <label>Precio</label>
+        <input type="number" formControlName="precio" placeholder="1200">
+      </div>
+
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea formControlName="descripcion" placeholder="Detalles del sabor..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Foto</label>
+        <!-- Importante: id="fileInput" para poder limpiarlo desde el TS -->
+        <input type="file" id="fileInput" (change)="onFileSelected($event)" accept="image/*">
+      </div>
+
+      <div *ngIf="mensaje" class="msg-box">
+        {{ mensaje }}
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="productoForm.invalid || !selectedFile">
+        Subir Producto
+      </button>
+
+    </form>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Grilla de Productos -->
+  <h3>Inventario ({{ productos.length }})</h3>
+  
+  <div class="grid">
+    <div *ngFor="let p of productos" class="card-producto">
+      <div class="img-wrapper">
+        <!-- Mostramos placeholder si no hay url aun -->
+        <img [src]="p.imagen_url || 'https://via.placeholder.com/150'" alt="Helado">
+      </div>
+      <div class="info">
+        <h4>{{ p.nombre }}</h4>
+        <span class="precio">${{ p.precio }}</span>
+        <p class="desc">{{ p.descripcion }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>

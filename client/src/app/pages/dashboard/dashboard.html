@@ -1,0 +1,64 @@
+<div class="dashboard-container">
+  
+  <header class="top-bar">
+    <h2>🍦 Panel de Ventas</h2>
+    <button (click)="logout()" class="btn-logout">Salir</button>
+  </header>
+
+  <div class="content">
+    
+    <section class="search-section">
+      <form [formGroup]="searchForm" (ngSubmit)="buscarCliente()" class="search-box">
+        <input 
+          type="text" 
+          formControlName="dni" 
+          placeholder="Ingresar DNI del cliente..." 
+          class="input-big"
+        >
+        <button type="submit" class="btn-action">🔍 Buscar</button>
+      </form>
+    </section>
+
+    <div *ngIf="mensaje" class="alert-box">
+      {{ mensaje }}
+    </div>
+
+    <section *ngIf="cliente" class="client-card">
+      <div class="client-header">
+        <h3>{{ cliente.nombre }}</h3>
+        <span class="puntos-badge">{{ cliente.puntos_actuales }} Pts</span>
+      </div>
+      <p>DNI: {{ cliente.dni }}</p>
+
+      <hr>
+
+      <form [formGroup]="movimientoForm" class="actions-area">
+        <label>Monto ($) o Puntos</label>
+        <input type="number" formControlName="monto" placeholder="0" class="input-money">
+        
+        <div class="buttons-row">
+          <button type="button" (click)="realizarMovimiento('SUMAR')" class="btn-success">
+            💰 Cargar Compra (+10%)
+          </button>
+          <button type="button" (click)="realizarMovimiento('CANJEAR')" class="btn-warning">
+            🎁 Canjear Puntos
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section *ngIf="modoRegistro" class="register-card">
+      <h3>🆕 Nuevo Cliente</h3>
+      <p>Registrar para empezar a sumar puntos.</p>
+      
+      <form [formGroup]="registroForm" (ngSubmit)="registrarCliente()">
+        <input type="text" formControlName="dni" placeholder="DNI" class="input-std" readonly>
+        <input type="text" formControlName="nombre" placeholder="Nombre Completo" class="input-std">
+        <input type="email" formControlName="email" placeholder="Email (Opcional)" class="input-std">
+        
+        <button type="submit" class="btn-save">Guardar Cliente</button>
+      </form>
+    </section>
+
+  </div>
+</div>
