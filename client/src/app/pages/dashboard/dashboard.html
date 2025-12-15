@@ -1,64 +1,122 @@
 <div class="dashboard-container">
   
   <header class="top-bar">
-    <h2>🍦 Panel de Ventas</h2>
-    <button (click)="logout()" class="btn-logout">Salir</button>
+    <div class="user-info">
+      <h2><i class="fa-solid fa-ice-cream fa-1x"></i> Yo Heladería</h2>
+      <small>Hola, <strong>{{ usuarioNombre }} </strong> <i class="fa-solid fa-user-circle"></i></small>
+    </div>
+    <button (click)="logout()" class="btn-logout">
+      <i class="fa-solid fa-right-from-bracket"></i> Salir
+    </button>
   </header>
 
-  <div class="content">
-    
-    <section class="search-section">
-      <form [formGroup]="searchForm" (ngSubmit)="buscarCliente()" class="search-box">
-        <input 
-          type="text" 
-          formControlName="dni" 
-          placeholder="Ingresar DNI del cliente..." 
-          class="input-big"
-        >
-        <button type="submit" class="btn-action">🔍 Buscar</button>
-      </form>
-    </section>
+  <div class="main-content-wrapper">
 
-    <div *ngIf="mensaje" class="alert-box">
-      {{ mensaje }}
-    </div>
-
-    <section *ngIf="cliente" class="client-card">
-      <div class="client-header">
-        <h3>{{ cliente.nombre }}</h3>
-        <span class="puntos-badge">{{ cliente.puntos_actuales }} Pts</span>
-      </div>
-      <p>DNI: {{ cliente.dni }}</p>
-
-      <hr>
-
-      <form [formGroup]="movimientoForm" class="actions-area">
-        <label>Monto ($) o Puntos</label>
-        <input type="number" formControlName="monto" placeholder="0" class="input-money">
-        
-        <div class="buttons-row">
-          <button type="button" (click)="realizarMovimiento('SUMAR')" class="btn-success">
-            💰 Cargar Compra (+10%)
+      <ng-container *ngIf="usuarioRol === 'admin'">
+        <nav class="nav-buttons">
+          <button (click)="cambiarSeccion('CAJA')" [class.active]="seccionActiva === 'CAJA'">
+            <i class="fa-solid fa-cash-register"></i> Caja
           </button>
-          <button type="button" (click)="realizarMovimiento('CANJEAR')" class="btn-warning">
-            🎁 Canjear Puntos
+
+          <button (click)="cambiarSeccion('REGISTRO')" [class.active]="seccionActiva === 'REGISTRO'">
+            <i class="fa-solid fa-user-plus"></i> Crear Cliente
           </button>
+
+          <button (click)="cambiarSeccion('PRODUCTOS')" [class.active]="seccionActiva === 'PRODUCTOS'">
+            <i class="fa-solid fa-list"></i> Catálogo
+          </button>
+
+          <button *ngIf="usuarioRol === 'admin'" (click)="cambiarSeccion('NUEVO_SABOR')" [class.active]="seccionActiva === 'NUEVO_SABOR'">
+            <i class="fa-solid fa-plus"></i> Nuevo Producto
+          </button>
+        </nav>
+
+        <div class="content">
+          <div *ngIf="mensaje" class="alert-box" [ngClass]="tipoMensaje">{{ mensaje }}</div>
+
+          <div *ngIf="seccionActiva === 'CAJA'" class="tab-content animate-in">
+            <section class="search-section" *ngIf="!clienteBuscado">
+              <h3>Buscar Cliente</h3>
+              <form [formGroup]="searchForm" (ngSubmit)="buscarCliente()" class="search-box">
+                <input type="number" formControlName="dni" placeholder="DNI..." class="input-big" [readonly]="loading"> 
+                <button type="submit" class="btn-action">
+                    <i class="fa-solid" [ngClass]="loading ? 'fa-spinner fa-spin' : 'fa-magnifying-glass'"></i>
+                </button>
+              </form>
+            </section>
+            <app-panel-movimientos *ngIf="clienteBuscado" [cliente]="clienteBuscado" [usuarioId]="usuarioId"
+                (operacionTerminada)="onOperacionTerminada($event)" (cancelar)="clienteBuscado = null"> 
+            </app-panel-movimientos>
+          </div>
+
+          <div *ngIf="seccionActiva === 'REGISTRO'" class="tab-content animate-in">
+            <app-cliente-nuevo [dniInicial]="''" (clienteCreado)="onClienteCreado($event)" (cancelar)="cambiarSeccion('CAJA')"></app-cliente-nuevo>
+          </div>
+
+          <div *ngIf="seccionActiva === 'PRODUCTOS'" class="tab-content animate-in">
+            <app-productos-admin vista="lista" [esAdmin]="usuarioRol === 'admin'" (onEditar)="irAEditarProducto($event)"></app-productos-admin>
+          </div>
+
+          <div *ngIf="seccionActiva === 'NUEVO_SABOR'" class="tab-content animate-in">
+            <app-productos-admin vista="formulario" [productoAEditar]="productoParaEditar" (onCancelar)="volverAListaProductos()"></app-productos-admin>
+          </div>
         </div>
-      </form>
-    </section>
+      </ng-container>
 
-    <section *ngIf="modoRegistro" class="register-card">
-      <h3>🆕 Nuevo Cliente</h3>
-      <p>Registrar para empezar a sumar puntos.</p>
-      
-      <form [formGroup]="registroForm" (ngSubmit)="registrarCliente()">
-        <input type="text" formControlName="dni" placeholder="DNI" class="input-std" readonly>
-        <input type="text" formControlName="nombre" placeholder="Nombre Completo" class="input-std">
-        <input type="email" formControlName="email" placeholder="Email (Opcional)" class="input-std">
+
+      <div *ngIf="usuarioRol === 'cliente'" class="cliente-view animate-in">
         
-        <button type="submit" class="btn-save">Guardar Cliente</button>
-      </form>
-    </section>
+        <aside class="sidebar-area">
+            <div class="puntos-banner">
+              <div class="glass-card" *ngIf="miPerfilCliente; else loadingPerfil">
+                <div class="card-top">
+                  <span class="brand"><i class="fa-solid fa-ice-cream fa-1x"></i> Yo Heladería</span>
+                  <span class="member-since">Socio Frecuente</span>
+                </div>
+                
+                <div class="card-body">
+                  <small>Tus Puntos Acumulados</small>
+                  <h1 class="puntos-gigantes">{{ miPerfilCliente.puntos_actuales }}</h1>
+                </div>
 
-  </div>
+                <div class="card-footer">
+                  <p>{{ miPerfilCliente.nombre | uppercase }}</p>
+                  <small>DNI: {{ miPerfilCliente.dni }}</small>
+                </div>
+              </div>
+
+              <ng-template #loadingPerfil>
+                <div class="loading-state">
+                  <p>
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> Cargando tus puntos...
+                  </p>
+                </div>
+              </ng-template>
+            </div>
+        </aside>
+
+        <main class="catalog-area">
+            <div class="catalogo-section">
+              <h3><i class="fa-solid fa-ice-cream fa-1x"></i> Nuestros Productos</h3>
+              <app-productos-admin vista="lista" [esAdmin]="false"></app-productos-admin>
+            </div>
+        </main>
+
+      </div>
+  
+  </div> <footer class="app-footer">
+    <div class="footer-content">
+      <div class="footer-col logo-col">
+        <h3><i class="fa-solid fa-ice-cream fa-1x"></i> Yo Heladería</h3>
+        <p>El auténtico sabor, hecho con pasión y los mejores ingredientes.</p>
+      </div>
+      <div class="footer-col contact-col">
+        <p><i class="fa-solid fa-map-location-dot"></i> Bv. Concordia 80</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Yo Heladería. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
 </div>

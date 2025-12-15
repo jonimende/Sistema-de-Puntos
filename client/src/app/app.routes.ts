@@ -1,16 +1,16 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './pages/login/login';
-import { DashboardComponent } from './pages/dashboard/dashboard';
+import { Dashboard } from './pages/dashboard/dashboard';
 import { authGuard } from './guards/auth-guard';
-import { HomeComponent } from './pages/home/home';
+import { ProductosAdminComponent } from './pages/productos-admin/productos-admin';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { 
       path: 'dashboard', 
-      component: DashboardComponent,
+      component: Dashboard,
       canActivate: [authGuard] // <--- Ahora está protegido
     },
-    { path: 'home', component: HomeComponent },
+    {path: 'productos', component: ProductosAdminComponent},
     { path: '', redirectTo: 'login', pathMatch: 'full' }
 ];

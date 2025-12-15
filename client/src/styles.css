@@ -1,1 +1,42 @@
-/* You can add global styles to this file, and also import other style files */
+body { margin: 0; padding: 0; }
+/* --- RESET Y FUENTE GLOBAL (Professional Look) --- */
+:root {
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --color-primary: #004aad; /* Tu azul corporativo */
+  --color-secondary: #0061f2;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  /* Aplicamos la fuente Inter a todo */
+  font-family: var(--font-main);
+  /* Truco para que la letra se vea más nítida y delgada (estilo Apple) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa; /* Fondo gris muy suave para que resalte el blanco */
+  color: #2d3436; /* Gris oscuro en vez de negro puro (descansa la vista) */
+}
+
+/* --- MEJORAS DE TEXTO --- */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700; /* Negrita fuerte para títulos */
+  letter-spacing: -0.5px; /* Unir un poquito las letras hace que se vea más moderno */
+  color: #1a1a1a;
+}
+
+/* Inputs y Botones heredan la fuente (a veces no lo hacen solos) */
+input, button, textarea, select {
+  font-family: var(--font-main);
+}
+
+/* --- ANIMACIONES GLOBALES (Opcional, para suavidad) --- */
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,65 +1,90 @@
-<div class="admin-container">
-  
-  <div class="header">
-    <h2>🍦 Gestión de Helados</h2>
-    <p>Cargá nuevos gustos al sistema.</p>
+<div class="container-productos">
+
+  <div *ngIf="vista === 'formulario'" class="vista-form fade-in">
+    <div class="card-form-centrada">
+      <div class="form-header">
+        <h3><i class="fa-solid fa-pen-to-square"></i> {{ productoAEditar ? 'Editar Sabor' : 'Nuevo Sabor' }}</h3>
+        <button type="button" class="btn-close" (click)="limpiarFormulario()">✕</button>
+      </div>
+
+      <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" formControlName="nombre" placeholder="Ej: Super Dulce de Leche">
+        </div>
+
+        <div class="form-group">
+          <label>Precio ($)</label>
+          <input type="number" formControlName="precio" placeholder="Ej: 1500">
+        </div>
+
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea formControlName="descripcion" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Imagen {{ productoAEditar ? '(Opcional)' : '' }}</label>
+          <input type="file" id="fileInput" (change)="onFileSelected($event)" accept="image/*">
+        </div>
+
+        <div *ngIf="mensaje" class="msg-box">{{ mensaje }}</div>
+
+        <div class="actions">
+          <button type="button" class="btn-secondary" (click)="limpiarFormulario()">Cancelar</button>
+          <button type="submit" class="btn-primary" [disabled]="productoForm.invalid">
+            {{ productoAEditar ? 'Guardar Cambios' : 'Crear Producto' }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <!-- Tarjeta de Carga -->
-  <div class="card-form">
-    <h3>Nuevo Producto</h3>
+  <div *ngIf="vista === 'lista'" class="vista-lista fade-in">
     
-    <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
-      
-      <div class="form-group">
-        <label>Nombre</label>
-        <input type="text" formControlName="nombre" placeholder="Ej: Tramontana">
-      </div>
+    <div class="lista-header" *ngIf="esAdmin">
+      <h3>Lista de Precios</h3>
+      <p>Total: {{ productos.length }} productos</p>
+    </div>
 
-      <div class="form-group">
-        <label>Precio</label>
-        <input type="number" formControlName="precio" placeholder="1200">
-      </div>
+    <div *ngIf="productos.length === 0" class="empty-state">
+      <i class="fa-solid fa-ice-cream fa-3x"></i> 
+      <p>No hay productos cargados.</p>
+    </div>
 
-      <div class="form-group">
-        <label>Descripción</label>
-        <textarea formControlName="descripcion" placeholder="Detalles del sabor..."></textarea>
-      </div>
+    <div *ngIf="productos.length > 0" class="grid-layout">
+      <div *ngFor="let p of productos" class="card-helado">
+        <div class="img-container">
+          <img [src]="p.imagen_url ? p.imagen_url : 'assets/placeholder.png'" alt="Helado">
+        </div>
+        
+        <div class="card-body">
+          <div class="card-titles">
+            <h4>{{ p.nombre }}</h4>
+            <span class="badge-precio">$ {{ p.precio }}</span>
+          </div>
+          <p class="card-desc">{{ p.descripcion }}</p>
+          
+          <div class="admin-buttons" *ngIf="esAdmin">
+            <button (click)="clickEditar(p)" class="btn-icon edit" title="Editar">
+                <i class="fa-solid fa-pen"></i>
+            </button>
+            
+            <button (click)="clickEliminar(p.id!)" class="btn-icon delete" title="Borrar">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
 
-      <div class="form-group">
-        <label>Foto</label>
-        <!-- Importante: id="fileInput" para poder limpiarlo desde el TS -->
-        <input type="file" id="fileInput" (change)="onFileSelected($event)" accept="image/*">
-      </div>
+          <div class="cliente-info" *ngIf="!esAdmin">
+             <div class="disponible-badge">
+                <span><i class="fa-solid fa-map-location-dot"></i> Conseguilo en el local</span>
+             </div>
+          </div>
 
-      <div *ngIf="mensaje" class="msg-box">
-        {{ mensaje }}
-      </div>
-
-      <button type="submit" class="btn-submit" [disabled]="productoForm.invalid || !selectedFile">
-        Subir Producto
-      </button>
-
-    </form>
-  </div>
-
-  <hr class="divider">
-
-  <!-- Grilla de Productos -->
-  <h3>Inventario ({{ productos.length }})</h3>
-  
-  <div class="grid">
-    <div *ngFor="let p of productos" class="card-producto">
-      <div class="img-wrapper">
-        <!-- Mostramos placeholder si no hay url aun -->
-        <img [src]="p.imagen_url || 'https://via.placeholder.com/150'" alt="Helado">
-      </div>
-      <div class="info">
-        <h4>{{ p.nombre }}</h4>
-        <span class="precio">${{ p.precio }}</span>
-        <p class="desc">{{ p.descripcion }}</p>
+        </div>
       </div>
     </div>
+    
   </div>
 
 </div>

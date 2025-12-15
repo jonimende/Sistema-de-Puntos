@@ -1,129 +1,183 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core'; // 1. Importamos ChangeDetectorRef
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { jwtDecode } from 'jwt-decode'; 
 
-// 1. Imports Correctos de Servicios
+import { ProductosAdminComponent } from '../productos-admin/productos-admin'; 
+import { ClienteNuevoComponent } from '../cliente-nuevo/cliente-nuevo'; 
+import { PanelMovimientosComponent } from '../panel-movs/panel-movs';
+
 import { ClienteService } from '../../services/clientes'; 
-import { MovimientosService } from '../../services/movimientos';
 import { AuthService } from '../../services/auth';
-
-// 2. Import Correcto de la Interfaz (Solo uno)
-import { Cliente } from '../../interfaces';
+import { Cliente, Producto } from '../../interfaces';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    ProductosAdminComponent, 
+    PanelMovimientosComponent, 
+    ClienteNuevoComponent
+  ], 
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
-export class DashboardComponent {
+export class Dashboard implements OnInit {
   private fb = inject(FormBuilder);
-  
-  // 3. Inyeccion con los nombres de clase correctos
   private clienteService = inject(ClienteService);
-  private movimientosService = inject(MovimientosService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cd = inject(ChangeDetectorRef); // 2. Inyectamos el detector de cambios
 
-  cliente: Cliente | null = null;
+  // --- DATOS USUARIO ---
+  usuarioRol: string = ''; 
+  usuarioNombre: string = '';
+  usuarioId: number = 0;
+
+  // --- NAVEGACIÓN ---
+  seccionActiva: string = 'CAJA'; // Por defecto para Admin/Empleados
+
+  // --- DATOS ---
+  miPerfilCliente: Cliente | null = null; 
+  clienteBuscado: Cliente | null = null; 
+  productoParaEditar: Producto | null = null;
+
   mensaje: string = '';
-  modoRegistro: boolean = false;
-  usuarioId = 1; 
+  tipoMensaje: 'success' | 'error' | '' = '';
+  loading: boolean = false; 
 
   searchForm: FormGroup = this.fb.group({
     dni: ['', [Validators.required, Validators.minLength(7)]]
   });
 
-  movimientoForm: FormGroup = this.fb.group({
-    monto: ['', [Validators.required, Validators.min(1)]]
-  });
+  ngOnInit() {
+    const token = this.authService.getToken();
+    
+    if (token) {
+      try {
+        const decoded: any = jwtDecode(token);
+        console.log('🔑 Token Decodificado:', decoded);
 
-  registroForm: FormGroup = this.fb.group({
-    dni: ['', Validators.required],
-    nombre: ['', Validators.required],
-    email: [''], 
-  });
+        this.usuarioId = decoded.id;
+        this.usuarioNombre = decoded.username || decoded.nombre; 
+        
+        // Convertimos a minúsculas por seguridad
+        this.usuarioRol = (decoded.rol || 'cliente').toLowerCase(); 
 
+        // --- LÓGICA EXCLUSIVA PARA CLIENTES ---
+        if (this.usuarioRol === 'cliente') {
+          // Buscamos el DNI en el token (campo 'dni' o 'username')
+          const dniCliente = decoded.dni || decoded.username;
+          
+          if (dniCliente) {
+              console.log('🔎 Buscando perfil para DNI:', dniCliente);
+              this.cargarMiPerfil(dniCliente); 
+          } else {
+              this.mostrarMensaje('Error: No se encontró DNI en tu sesión', 'error');
+          }
+        }
+
+      } catch (e) {
+        console.error('Error al leer el token', e);
+        this.logout();
+      }
+    } else {
+      this.router.navigate(['/login']);
+    }
+  }
+
+  // --- MÉTODOS DE NAVEGACIÓN (ADMIN/EMPLEADO) ---
+  cambiarSeccion(seccion: string) {
+    this.seccionActiva = seccion;
+    this.mensaje = ''; 
+    
+    if (seccion !== 'CAJA') {
+        this.clienteBuscado = null;
+        this.searchForm.reset();
+    }
+    if (seccion !== 'NUEVO_SABOR') {
+        this.productoParaEditar = null;
+    }
+  }
+
+  irAEditarProducto(producto: Producto) {
+    this.productoParaEditar = producto;
+    this.seccionActiva = 'NUEVO_SABOR'; 
+  }
+
+  volverAListaProductos() {
+    this.productoParaEditar = null;
+    this.seccionActiva = 'PRODUCTOS'; 
+  }
+
+  // --- LÓGICA DE CLIENTE (FIX "CARGANDO...") ---
+  cargarMiPerfil(dni: string) {
+    this.clienteService.getClienteByDni(dni).subscribe({
+        next: (data) => {
+            console.log('✅ Perfil recibido:', data);
+            
+            if (data) {
+                this.miPerfilCliente = data;
+                // 3. Forzamos la actualización de la vista para quitar el "Cargando..."
+                this.cd.detectChanges(); 
+            } else {
+                console.warn('⚠️ El backend devolvió datos vacíos');
+            }
+        },
+        error: (err) => {
+            console.error('❌ Error API:', err);
+            this.mostrarMensaje('No se pudieron cargar tus puntos.', 'error');
+        }
+    });
+  }
+
+  // --- LÓGICA CAJA (ADMIN) ---
   buscarCliente() {
+    if (this.searchForm.invalid) return;
+    this.loading = true;
     this.mensaje = '';
-    this.cliente = null;
-    this.modoRegistro = false;
+    this.clienteBuscado = null;
     
     const dni = this.searchForm.value.dni;
 
-    // 4. Tipado explicito en el subscribe (data: Cliente)
     this.clienteService.getClienteByDni(dni).subscribe({
       next: (data: Cliente) => {
-        this.cliente = data;
+        this.clienteBuscado = data;
+        this.loading = false;
       },
       error: () => {
-        this.mensaje = 'Cliente no encontrado. ¿Desea registrarlo?';
-        this.modoRegistro = true;
-        this.registroForm.patchValue({ dni: dni });
+        this.loading = false;
+        this.mostrarMensaje('Cliente no encontrado.', 'error');
       }
     });
   }
 
-  registrarCliente() {
-    this.clienteService.createCliente(this.registroForm.value).subscribe({
-      next: (nuevoCliente: Cliente) => {
-        this.cliente = nuevoCliente;
-        this.modoRegistro = false;
-        this.mensaje = '¡Cliente registrado con éxito!';
-      },
-      error: (err: any) => {
-        this.mensaje = 'Error al registrar: ' + (err.error?.msg || 'Error desconocido');
-      }
-    });
+  onOperacionTerminada(msg: string) {
+    this.mostrarMensaje(msg, 'success');
+    setTimeout(() => { 
+        this.clienteBuscado = null;
+        this.searchForm.reset();
+        this.mensaje = '';
+    }, 3000);
   }
 
-  realizarMovimiento(tipo: 'SUMAR' | 'CANJEAR') {
-    if (!this.cliente || this.movimientoForm.invalid) return;
+  onClienteCreado(nuevoCliente: Cliente) {
+    this.mostrarMensaje('¡Cliente creado!', 'success');
+    this.seccionActiva = 'CAJA';
+    this.clienteBuscado = nuevoCliente;
+  }
 
-    const monto = this.movimientoForm.value.monto;
-    
-    if (tipo === 'SUMAR') {
-      const body = {
-        dni: this.cliente.dni,
-        monto_compra: monto,
-        usuario_id: this.usuarioId
-      };
-      
-      // 5. Tipado explicito del resultado (res: any)
-      this.movimientosService.sumarPuntos(body).subscribe({
-        next: (res: any) => {
-          this.mensaje = res.msg;
-          if (this.cliente) this.cliente.puntos_actuales = res.nuevo_saldo;
-          this.movimientoForm.reset();
-        },
-        error: (err: any) => {
-          this.mensaje = 'Error al sumar: ' + (err.error?.msg || 'Intente de nuevo');
-        }
-      });
-    } 
-    else if (tipo === 'CANJEAR') {
-      const body = {
-        dni: this.cliente.dni,
-        puntos_a_canjear: monto,
-        usuario_id: this.usuarioId
-      };
-
-      this.movimientosService.canjearPuntos(body).subscribe({
-        next: (res: any) => {
-          this.mensaje = res.msg;
-          if (this.cliente) this.cliente.puntos_actuales = res.nuevo_saldo;
-          this.movimientoForm.reset();
-        },
-        error: (err: any) => {
-          this.mensaje = err.error?.msg || 'Error al canjear';
-        }
-      });
-    }
+  mostrarMensaje(texto: string, tipo: 'success' | 'error') {
+    this.mensaje = texto;
+    this.tipoMensaje = tipo;
+    if (tipo === 'error') setTimeout(() => this.mensaje = '', 5000);
   }
 
   logout() {
     this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
