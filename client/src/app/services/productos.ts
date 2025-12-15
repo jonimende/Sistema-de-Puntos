@@ -9,15 +9,23 @@ import { Observable } from 'rxjs';
 })
 export class ProductoService {
   private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
+  
+  private apiUrl = environment.apiUrl; 
 
-  // Obtener todos los helados para la lista
+  // 1. Obtener todos los helados (GET)
   getProductos(): Observable<Producto[]> {
     return this.http.get<Producto[]>(`${this.apiUrl}/productos`);
   }
 
-  // Crear producto (IMPORTANTE: Recibe FormData para poder subir la imagen)
   crearProducto(formData: FormData): Observable<Producto> {
     return this.http.post<Producto>(`${this.apiUrl}/productos`, formData);
+  }
+
+  updateProducto(id: number, formData: FormData): Observable<any> {
+    return this.http.put(`${this.apiUrl}/productos/${id}`, formData);
+  }
+
+  deleteProducto(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/productos/${id}`);
   }
 }

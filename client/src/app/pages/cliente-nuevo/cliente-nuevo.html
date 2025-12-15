@@ -1,0 +1,48 @@
+<div class="registro-container">
+  <div class="header-reg">
+    <h3><i class="fa-solid fa-user-plus fa-1x"></i>  Alta de Cliente</h3>
+    <p>Registrando DNI: <strong>{{ dniInicial }}</strong></p>
+  </div>
+
+  <form [formGroup]="registroForm" (ngSubmit)="registrar()">
+    
+    <div class="form-group">
+      <label>DNI</label>
+      <input type="number" formControlName="dni" placeholder="Ingrese DNI nuevamente o modifique">
+    </div>
+
+    <div class="form-group">
+      <label>Nombre y Apellido</label>
+      <input type="text" formControlName="nombre" placeholder="Ej: Juan Perez" autofocus>
+    </div>
+
+    <div class="form-group">
+      <label>Email (Opcional)</label>
+      <input type="email" formControlName="email" placeholder="cliente@email.com">
+    </div>
+
+    <div class="form-group">
+      <label>Crear Contraseña</label>
+      <input 
+        type="password" 
+        formControlName="password" 
+        placeholder="Mínimo 4 caracteres"
+      >
+      <small style="color: #747d8c; font-size: 0.8em;">(Para que el cliente revise sus puntos)</small>
+    </div>
+
+    <div *ngIf="errorMsg" class="error-box">
+      {{ errorMsg }}
+    </div>
+
+    <div class="btn-row">
+      <button type="button" (click)="cancelar.emit()" class="btn-secondary">Cancelar</button>
+      <button type="submit" class="btn-primary" [disabled]="loading || registroForm.invalid">
+        <i class="fa-solid" [ngClass]="loading ? 'fa-circle-notch fa-spin' : 'fa-floppy-disk'"></i>
+        
+        <span> {{ loading ? 'Guardando...' : 'Guardar Cliente' }}</span>
+      </button>
+    </div>
+
+  </form>
+</div>

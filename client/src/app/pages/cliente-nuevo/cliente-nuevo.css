@@ -1,0 +1,60 @@
+.registro-container {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  animation: fadeIn 0.3s;
+  border-left: 5px solid #3742fa; /* Borde azul para diferenciar */
+}
+
+.header-reg h3 { margin: 0 0 10px 0; color: #3742fa; }
+.header-reg p { margin: 0 0 20px 0; color: #747d8c; font-size: 0.9rem; }
+
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #2f3542; }
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dfe4ea;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+.input-readonly { background-color: #f1f2f6; color: #a4b0be; }
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  flex: 2;
+  background-color: #3742fa;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  flex: 1;
+  background-color: #f1f2f6;
+  color: #747d8c;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.error-box {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  margin-bottom: 15px;
+}

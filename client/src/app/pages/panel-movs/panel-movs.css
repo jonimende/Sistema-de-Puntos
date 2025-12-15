@@ -1,0 +1,185 @@
+/* Contenedor principal con animación de entrada */
+.movimientos-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    animation: slideUp 0.4s ease-out;
+}
+  
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tarjeta Principal */
+.card-panel {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Para que el header no se salga */
+    border: 1px solid #e9ecef;
+}
+
+/* --- HEADER: DATOS DEL CLIENTE --- */
+.cliente-header {
+    background: linear-gradient(135deg, #004aad 0%, #0061f2 100%);
+    color: white;
+    padding: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.datos h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.datos small {
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+/* Caja de Puntos (Tipo Display Digital) */
+.puntos-display {
+    text-align: right;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+}
+
+.puntos-display .lbl {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.puntos-display .val {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+/* --- CUERPO DEL PANEL --- */
+.body-panel {
+    padding: 30px;
+}
+
+.form-mov {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.label-monto {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #636e72;
+    text-align: center;
+}
+
+/* Input Gigante (Tipo Cajero) */
+.input-gigante {
+    font-size: 2.5rem;
+    text-align: center;
+    padding: 15px;
+    border: 2px solid #dfe6e9;
+    border-radius: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    font-weight: 700;
+    color: #2d3436;
+    transition: all 0.3s;
+    outline: none;
+}
+
+.input-gigante:focus {
+    border-color: #004aad;
+    box-shadow: 0 0 0 5px rgba(0, 74, 173, 0.1);
+}
+
+.input-gigante::placeholder {
+    color: #dfe6e9;
+}
+
+/* --- BOTONES DE ACCIÓN --- */
+.acciones-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.btn-accion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, filter 0.2s;
+    height: 120px;
+}
+
+.btn-accion:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.05);
+}
+
+.btn-accion:active {
+    transform: scale(0.98);
+}
+
+/* Estilo Botón SUMAR (Verde Dinero) */
+.btn-sumar {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Estilo Botón CANJEAR (Naranja/Oro) */
+.btn-restar {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+}
+
+.icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.txt {
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.txt small {
+    font-weight: 400;
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+/* Botón Cancelar */
+.btn-cancelar {
+    background: transparent;
+    border: none;
+    color: #b2bec3;
+    font-weight: 600;
+    margin-top: 10px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.btn-cancelar:hover {
+    color: #636e72;
+}

@@ -1,28 +1,28 @@
 <div class="login-container">
   <div class="login-card">
     <div class="logo">
-      <h1>🍦 La Marquesa</h1>
+      <h1><i class="fa-solid fa-ice-cream" style="color: #004aad;"></i> Yo Heladeria</h1>
       <p>Acceso al sistema</p>
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       
       <div class="input-group">
-        <label>Usuario</label>
-        <input type="text" formControlName="username" class="form-control" placeholder="admin">
+        <label><i class="fa-solid fa-user"></i> Usuario</label>
+        <input type="text" formControlName="username" class="form-control" placeholder="DNI / Usuario">
       </div>
 
       <div class="input-group">
-        <label>Contraseña</label>
+        <label><i class="fa-solid fa-lock"></i> Contraseña</label>
         <input type="password" formControlName="password" class="form-control" placeholder="••••••">
       </div>
 
       <div *ngIf="errorMsg" class="alert-error">
-        {{ errorMsg }}
+        <i class="fa-solid fa-circle-exclamation"></i> {{ errorMsg }}
       </div>
 
       <button type="submit" class="btn btn-primary full-width" [disabled]="loginForm.invalid">
-        Ingresar
+        <i class="fa-solid fa-right-to-bracket"></i> Ingresar
       </button>
 
     </form>

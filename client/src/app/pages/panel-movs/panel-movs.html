@@ -1,0 +1,50 @@
+<div class="movimientos-container">
+  
+  <div class="card-panel">
+    
+    <div class="cliente-header">
+      <div class="datos">
+        <h2>{{ cliente.nombre | titlecase }}</h2>
+        <small>DNI: {{ cliente.dni }}</small>
+      </div>
+      <div class="puntos-display">
+        <span class="lbl">Puntos Disponibles</span>
+        <span class="val">{{ cliente.puntos_actuales }}</span>
+      </div>
+    </div>
+
+    <div class="body-panel">
+      <form [formGroup]="movForm" class="form-mov">
+        
+        <div>
+          <label class="label-monto">Ingrese el Valor</label>
+          <input 
+            type="number" 
+            formControlName="monto" 
+            class="input-gigante" 
+            placeholder="0"
+            autofocus
+          >
+        </div>
+
+        <div class="acciones-grid">
+          
+          <button type="button" (click)="procesar('SUMAR')" class="btn-accion btn-sumar">
+            <i class="fa-solid fa-wallet icon"></i>
+            <span class="txt">Cargar Compra <br><small>Suma Puntos</small></span>
+          </button>
+
+          <button type="button" (click)="procesar('DESCONTAR')" class="btn-accion btn-restar">
+            <i class="fa-solid fa-gift icon"></i>
+            <span class="txt">Canjear Premio <br><small>Resta Puntos</small></span>
+          </button>
+
+        </div>
+
+        <button type="button" (click)="cancelar.emit()" class="btn-cancelar">Cancelar Operación</button>
+      </form>
+    </div>
+
+  </div>
+
+</div>
