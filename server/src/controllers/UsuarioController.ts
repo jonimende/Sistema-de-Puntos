@@ -1,47 +1,79 @@
 import { Request, Response } from 'express';
 import * as bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Usuario } from '../models/assosiations'; // Importamos desde el archivo de relaciones
+import { applyAssosiations } from '../models/assosiations'; 
+import Usuario from '../models/Usuario';
+import Cliente from '../models/Clientes'; // Asegurate que la importación sea correcta
 
 export const login = async (req: Request, res: Response) => {
+    // El frontend manda un campo 'username', pero si es cliente, ahí vendrá el DNI.
     const { username, password } = req.body;
 
     try {
-        // 1. Verificar si el usuario existe
+        let entidad: any = null; // Aquí guardaremos al usuario O al cliente encontrado
+        let rol = '';
+        let nombreMostrar = '';
         const usuario: any = await Usuario.findOne({ where: { username } });
-        if (!usuario) {
-            return res.status(400).json({ msg: 'Usuario o contraseña incorrectos' });
+
+        if (usuario) {
+            entidad = usuario;
+            rol = usuario.rol; // 'admin' o 'user'
+            nombreMostrar = usuario.username;
+        } else {
+            const cliente: any = await Cliente.findOne({ where: { dni: username } });
+            
+            if (cliente) {
+                entidad = cliente;
+                rol = 'cliente'; // Forzamos el rol 'cliente'
+                nombreMostrar = cliente.nombre;
+            }
         }
 
-        // 2. Verificar contraseña
-        const validPassword = bcrypt.compareSync(password, usuario.password_hash);
+        if (!entidad) {
+            return res.status(400).json({ msg: 'Usuario/DNI o contraseña incorrectos' });
+        }
+
+        // Verificar contraseña (ambos modelos tienen el campo password_hash)
+        const validPassword = bcrypt.compareSync(password, entidad.password_hash);
         if (!validPassword) {
-            return res.status(400).json({ msg: 'Usuario o contraseña incorrectos' });
+            return res.status(400).json({ msg: 'Usuario/DNI o contraseña incorrectos' });
         }
 
-        // 3. Generar JWT (Token)
+        const tokenPayload = {
+            id: entidad.id,
+            rol: rol,
+            username: nombreMostrar,
+            // Si es cliente, guardamos el DNI en el token, puede ser útil luego
+            dni: rol === 'cliente' ? entidad.dni : null 
+        };
+
         const token = jwt.sign(
-            { id: usuario.id, rol: usuario.rol }, 
-            process.env.JWT_SECRET || 'palabrasecretatemporal', 
+            tokenPayload, 
+            process.env.JWT_SECRET || 'mi_super_secreta_palabra', 
             { expiresIn: '8h' }
         );
 
         res.json({
             msg: 'Login exitoso',
             token,
-            usuario: { username: usuario.username, rol: usuario.rol }
+            usuario: { 
+                id: entidad.id,
+                username: nombreMostrar, 
+                rol: rol 
+            }
         });
 
     } catch (error) {
+        console.error(error);
         res.status(500).json({ msg: 'Error en el servidor', error });
     }
 };
 
+// La función de crearUsuario la dejamos igual (solo para admins/empleados)
 export const crearUsuario = async (req: Request, res: Response) => {
     const { username, password, rol } = req.body;
 
     try {
-        // Encriptar contraseña antes de guardar
         const salt = bcrypt.genSaltSync();
         const password_hash = bcrypt.hashSync(password, salt);
 

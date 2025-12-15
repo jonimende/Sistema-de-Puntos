@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
-import { Movimiento, Cliente } from '../models/assosiations';
+import { applyAssosiations } from '../models/assosiations';
+import Movimiento from '../models/Movimientos';
+import Cliente from '../models/Clientes';
 import db from '../db'; // Necesitamos db para transacciones si quisieramos hilar fino
 
 export const sumarPuntos = async (req: Request, res: Response) => {

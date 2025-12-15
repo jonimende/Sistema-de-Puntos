@@ -1,54 +1,70 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { Usuario } from '../models/assosiations';
-
-// Extendemos la interfaz de Request localmente para que TS no se queje
-export interface CustomRequest extends Request {
-    usuario?: any; 
-}
+import Usuario from '../models/Usuario';
+import Cliente from '../models/Clientes';
 
 export const validarJWT = async (req: Request, res: Response, next: NextFunction) => {
-    // Leer el token del header personalizado 'x-token'
+    console.log('--- 1. Entrando a validarJWT ---');
     const token = req.header('x-token');
 
     if (!token) {
+        console.log('❌ No hay token en el header');
         return res.status(401).json({ msg: 'No hay token en la petición' });
     }
 
     try {
-        // Verificar el token
-        const { id }: any = jwt.verify(token, process.env.JWT_SECRET || 'palabrasecretatemporal');
+        const secret = process.env.JWT_SECRET || 'mi_super_secreta_palabra';
+        const payload: any = jwt.verify(token, secret);
+        console.log('✅ Token verificado. Payload:', payload);
 
-        // Leer el usuario que corresponde al id
-        const usuario = await Usuario.findByPk(id);
+        const { id, rol } = payload;
 
-        if (!usuario) {
-            return res.status(401).json({ msg: 'Token no válido - usuario no existe en DB' });
+        if (rol === 'cliente') {
+            const cliente = await Cliente.findByPk(id);
+            if (!cliente) return res.status(401).json({ msg: 'Cliente no existe' });
+            
+            (req as any).usuario = cliente; 
+            (req as any).esCliente = true;
+            console.log('👤 Usuario (Cliente) asignado a req.usuario');
+
+        } else if (rol === 'admin' || rol === 'user') {
+            const usuario = await Usuario.findByPk(id);
+            if (!usuario) return res.status(401).json({ msg: 'Usuario no existe' });
+
+            (req as any).usuario = usuario;
+            (req as any).esCliente = false;
+            console.log('👮 Usuario (Admin/User) asignado a req.usuario');
+        } else {
+            console.log('⚠️ Rol desconocido:', rol);
         }
 
-        // Colocar el usuario en la request para que los siguientes middlewares/controladores lo usen
-        // Usamos cast (req as any) o la interfaz CustomRequest para asignar
-        (req as CustomRequest).usuario = usuario;
-
-        next(); // Continuar con el siguiente middleware o controlador
+        next();
 
     } catch (error) {
-        console.log(error);
+        console.log('❌ Error en validarJWT:', error);
         res.status(401).json({ msg: 'Token no válido' });
     }
 };
 
 export const esAdmin = (req: Request, res: Response, next: NextFunction) => {
-    // Verificamos si validarJWT ya hizo su trabajo
-    if (!(req as CustomRequest).usuario) {
+    console.log('--- 2. Entrando a esAdmin ---');
+    
+    // Verificamos qué llega acá
+    const usuario = (req as any).usuario;
+    console.log('🧐 req.usuario es:', usuario ? 'Existe' : 'UNDEFINED');
+
+    if (!usuario) {
+        console.log('💥 ERROR CRÍTICO: req.usuario no existe. validarJWT falló o no guardó la variable.');
         return res.status(500).json({ msg: 'Se quiere verificar role sin validar el token primero' });
     }
 
-    const { rol, username } = (req as CustomRequest).usuario;
+    const { rol, username, nombre } = usuario;
+    console.log(`Rol del usuario: ${rol}`);
 
     if (rol !== 'admin') {
-        return res.status(401).json({ msg: `${username} no es administrador - No puede hacer esto` });
+        return res.status(401).json({ msg: `${username || nombre} no es administrador` });
     }
 
+    console.log('✅ Es Admin, pasando al controlador...');
     next();
 };

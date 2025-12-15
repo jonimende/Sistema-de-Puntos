@@ -1,22 +1,31 @@
 import { Request, Response } from 'express';
-import { Cliente } from '../models/assosiations';
+import { applyAssosiations } from '../models/assosiations';
+import Cliente from '../models/Clientes';
 import * as bcrypt from 'bcryptjs';
 
 // Buscar cliente por DNI (Para cuando llega a la caja)
 export const getClienteByDni = async (req: Request, res: Response) => {
-    const { dni } = req.params;
+    const { id } = req.params; 
+
+    console.log('Controlador ejecutándose. Buscando DNI:', id); // Debug
+
     try {
-        const cliente = await Cliente.findOne({ where: { dni } });
+        const cliente = await Cliente.findOne({ where: { dni: id } });
+
         if (!cliente) {
+            console.log('Cliente no encontrado en BD');
             return res.status(404).json({ msg: 'Cliente no encontrado' });
         }
+
+        console.log('Cliente encontrado, enviando...');
         res.json(cliente);
+
     } catch (error) {
+        console.error('Error en controlador:', error);
         res.status(500).json({ msg: 'Error al buscar cliente' });
     }
 };
 
-// Crear cliente rápido (Desde la caja)
 export const createCliente = async (req: Request, res: Response) => {
     const { dni, nombre, email, password } = req.body;
     try {
