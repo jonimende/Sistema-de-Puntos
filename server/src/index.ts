@@ -32,7 +32,7 @@ if (!fs.existsSync('./uploads')) {
 
 // Middlewares Globales
 app.use(cors({
-  origin: ["http://localhost:4200"],
+  origin: ["http://localhost:4200", "https://yoheladeria.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   // AGREGADO: 'x-token' para que Angular pueda mandarlo sin problemas
   allowedHeaders: ["Content-Type", "Authorization", "x-token"],
