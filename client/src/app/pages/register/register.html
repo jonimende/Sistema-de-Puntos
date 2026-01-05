@@ -1,0 +1,48 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="logo">
+      <h1><i class="fa-solid fa-ice-cream" style="color: #004aad;"></i> Únete a Yo Heladeria</h1>
+      <p>Crea tu cuenta para sumar puntos</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      
+      <div class="input-group">
+        <label><i class="fa-solid fa-user-pen"></i> Nombre Completo</label>
+        <input type="text" formControlName="nombre" class="input-custom" placeholder="Ej: Juan Pérez">
+      </div>
+
+      <div class="input-group">
+        <label><i class="fa-solid fa-id-card"></i> DNI</label>
+        <input type="text" formControlName="dni" class="input-custom" placeholder="Sin puntos">
+      </div>
+
+      <div class="input-group">
+        <label><i class="fa-solid fa-envelope"></i> Email</label>
+        <input type="email" formControlName="email" class="input-custom" placeholder="juan@email.com">
+      </div>
+
+      <div class="input-group">
+        <label><i class="fa-solid fa-lock"></i> Contraseña</label>
+        <input type="password" formControlName="password" class="input-custom" placeholder="••••••">
+      </div>
+
+      <div *ngIf="errorMsg" class="alert-box alert-error fade-in">
+        <i class="fa-solid fa-circle-exclamation"></i> {{ errorMsg }}
+      </div>
+
+      <div *ngIf="successMsg" class="alert-box alert-success fade-in">
+        <i class="fa-solid fa-check-circle"></i> {{ successMsg }}
+      </div>
+
+      <button type="submit" class="full-width" [disabled]="registerForm.invalid">
+        <i class="fa-solid fa-user-plus"></i> Registrarme
+      </button>
+
+      <div class="footer-link">
+        <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia Sesión</a></p>
+      </div>
+
+    </form>
+  </div>
+</div>

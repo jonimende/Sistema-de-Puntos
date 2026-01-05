@@ -1,5 +1,5 @@
 /* =========================================
-   LOGIN PROFESIONAL (AZUL & BLANCO)
+   REGISTRO PROFESIONAL (MISMO ESTILO LOGIN)
    ========================================= */
 
 /* Fondo de pantalla: Degradado Azul Profundo */
@@ -7,7 +7,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh; /* Usar min-height para que si el form es largo no se corte */
   width: 100%;
   background: linear-gradient(135deg, #004aad 0%, #042f66 100%);
   font-family: 'Segoe UI', system-ui, sans-serif;
@@ -18,17 +18,17 @@
 /* Tarjeta del Formulario */
 .login-card {
   background: white;
-  padding: 50px 40px;
-  border-radius: 16px; /* Bordes redondeados modernos */
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); /* Sombra profunda para efecto flotante */
+  padding: 40px 40px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 420px;
+  max-width: 450px; /* Un poco más ancho para el registro */
   text-align: center;
   position: relative;
   overflow: hidden;
 }
 
-/* Decoración superior (barra azul en la tarjeta) */
+/* Decoración superior */
 .login-card::before {
   content: '';
   position: absolute;
@@ -39,17 +39,8 @@
   background: linear-gradient(90deg, #0061f2, #00c6fb);
 }
 
-/* --- LOGO Y TÍTULOS --- */
-.logo {
-  margin-bottom: 40px;
-}
-
-.logo-icon {
-  font-size: 3rem;
-  margin-bottom: 10px;
-  display: block;
-}
-
+/* --- LOGO --- */
+.logo { margin-bottom: 30px; }
 .logo h1 {
   color: #1e272e;
   margin: 0;
@@ -57,16 +48,15 @@
   font-weight: 700;
   letter-spacing: -0.5px;
 }
-
 .logo p {
   color: #8395a7;
   margin-top: 5px;
   font-size: 0.95rem;
 }
 
-/* --- INPUTS Y LABELS --- */
-.form-group {
-  margin-bottom: 25px;
+/* --- INPUTS --- */
+.input-group {
+  margin-bottom: 20px; /* Espaciado entre inputs */
   text-align: left;
 }
 
@@ -78,21 +68,20 @@ label {
   font-size: 0.9rem;
 }
 
-/* Input moderno */
 .input-custom {
   width: 100%;
-  padding: 14px 16px;
+  padding: 12px 16px; /* Un poco menos de padding vertical para ahorrar espacio */
   font-size: 1rem;
   border: 2px solid #e1e8ef;
   border-radius: 8px;
   outline: none;
   transition: all 0.3s ease;
   background-color: #f8f9fa;
-  box-sizing: border-box; /* Para que el padding no rompa el ancho */
+  box-sizing: border-box;
 }
 
 .input-custom:focus {
-  border-color: #0061f2; /* Azul al hacer click */
+  border-color: #0061f2;
   background-color: white;
   box-shadow: 0 0 0 4px rgba(0, 97, 242, 0.1);
 }
@@ -117,46 +106,51 @@ label {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(0, 74, 173, 0.3);
 }
-
-.full-width:active {
-  transform: translateY(0);
+.full-width:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-.register-footer {
-  margin-top: 25px;
-  padding-top: 20px;
-  border-top: 1px solid #e1e8ef; /* Una linea sutil separadora */
-  font-size: 0.95rem;
-  color: #8395a7;
-}
-
-.register-footer a {
-  color: #004aad; /* El mismo azul oscuro de la marca */
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  margin-left: 5px;
-}
-
-.register-footer a:hover {
-  color: #0061f2; /* Azul más brillante al pasar el mouse */
-  text-decoration: underline;
-}
 /* --- ALERTAS --- */
-.alert-error {
-  color: #c0392b;
-  background-color: #fadbd8;
+.alert-box {
   padding: 12px;
   border-radius: 8px;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   font-size: 0.9rem;
-  border: 1px solid #f5b7b1;
   display: flex;
   align-items: center;
   gap: 10px;
   font-weight: 500;
 }
 
-/* Animación de entrada */
+.alert-error {
+  color: #c0392b;
+  background-color: #fadbd8;
+  border: 1px solid #f5b7b1;
+}
+
+.alert-success {
+  color: #155724;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+/* --- LINK FOOTER --- */
+.footer-link {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #8395a7;
+}
+
+.footer-link a {
+  color: #0061f2;
+  text-decoration: none;
+  font-weight: 600;
+}
+.footer-link a:hover { text-decoration: underline; }
+
+/* Animación */
 .fade-in { animation: fadeIn 0.5s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
