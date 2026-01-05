@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../enviroments/environments';
 import { AuthResponse, Usuario } from '../interfaces';
 import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
 
@@ -25,6 +26,11 @@ export class AuthService {
           }
         })
       );
+  }
+
+  register(datosCliente: any): Observable<any> {
+    // Apunta a la ruta pública que creamos antes
+    return this.http.post(`${this.apiUrl}/clientes/registro`, datosCliente);
   }
 
   logout() {
