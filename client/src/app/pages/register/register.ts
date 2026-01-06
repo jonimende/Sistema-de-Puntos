@@ -1,14 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../services/auth'; // Asegúrate de la ruta
-import { Router, RouterLink } from '@angular/router'; // Importamos RouterLink para el botón de "Volver"
+import { AuthService } from '../../services/auth'; // Corregido a .service
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink], 
-  templateUrl: './register.html',
+  templateUrl: './register.html', // Asegúrate que coincida con tu archivo real
   styleUrls: ['./register.css']
 })
 export class RegisterComponent {
@@ -18,31 +18,38 @@ export class RegisterComponent {
 
   registerForm: FormGroup = this.fb.group({
     nombre: ['', [Validators.required, Validators.minLength(3)]],
-    dni: ['', [Validators.required, Validators.minLength(7)]], // DNI Argentino usualmente 7-8
+    dni: ['', [Validators.required, Validators.minLength(7)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [Validators.required, Validators.minLength(6)]] // Mejor 6 caracteres
   });
 
   errorMsg: string = '';
-  successMsg: string = ''; // Para mostrar mensaje verde si sale bien
+  successMsg: string = '';
 
   onSubmit() {
     if (this.registerForm.invalid) return;
 
+    // Limpiamos mensajes previos
     this.errorMsg = '';
     this.successMsg = '';
 
     this.authService.register(this.registerForm.value).subscribe({
       next: (res) => {
+        // 1. Mostrar mensaje de éxito
         this.successMsg = '¡Cuenta creada con éxito! Redirigiendo al login...';
-        // Esperamos 2 segundos para que lea el mensaje y lo mandamos al login
+        
+        // 2. CONGELAR el formulario para evitar doble clic o edición
+        this.registerForm.disable();
+
+        // 3. Esperar 2 segundos y redirigir
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 2000);
       },
       error: (err) => {
-        // El backend devuelve msg en caso de error (ej: DNI repetido)
+        // Mostrar error y asegurar que el formulario siga editable
         this.errorMsg = err.error.msg || 'Error al registrarse';
+        this.registerForm.enable();
       }
     });
   }
