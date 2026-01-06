@@ -30,7 +30,7 @@ export class AuthService {
 
   register(datosCliente: any): Observable<any> {
     // Apunta a la ruta pública que creamos antes
-    return this.http.post(`${this.apiUrl}/registrarse`, datosCliente);
+    return this.http.post(`${this.apiUrl}/clientes/registrarse`, datosCliente);
   }
 
   logout() {
