@@ -20,7 +20,7 @@ export class RegisterComponent {
     nombre: ['', [Validators.required, Validators.minLength(3)]],
     dni: ['', [Validators.required, Validators.minLength(7)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]] // Mejor 6 caracteres
+    password: ['', [Validators.required, Validators.minLength(4)]] // Mejor 6 caracteres
   });
 
   errorMsg: string = '';
