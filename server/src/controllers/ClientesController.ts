@@ -4,7 +4,7 @@ import Cliente from '../models/Clientes';
 import * as bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
 
-applyAssosiations();
+
 
 // Buscar cliente por DNI (Para cuando llega a la caja)
 export const getClienteByDni = async (req: Request, res: Response) => {
