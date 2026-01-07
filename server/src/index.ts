@@ -78,8 +78,8 @@ async function main() {
             const hash = bcrypt.hashSync('Yohelados123', salt);
 
             await Usuario.create({
-                nombre: 'admin',
-                password: hash, // Guardamos el hash, NO la contraseña plana
+                username: 'admin',
+                password_hash: hash, // Guardamos el hash, NO la contraseña plana
                 rol: 'admin',
             });
 
