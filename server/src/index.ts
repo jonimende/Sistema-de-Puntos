@@ -6,7 +6,7 @@ import fs from 'fs';
 
 // --- IMPORTACIONES NUEVAS PARA EL ADMIN ---
 import bcrypt from 'bcryptjs'; // <--- NUEVO: Para encriptar
-import Usuario from './models/Usuarios'; // <--- NUEVO: Asegúrate que la ruta a tu modelo Usuario sea esta
+import Usuario from './models/Usuario'; // <--- NUEVO: Asegúrate que la ruta a tu modelo Usuario sea esta
 // -----------------------------------------
 
 // ... (Todo tu código de crash y middlewares sigue igual) ...
