@@ -1,14 +1,15 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core'; // 1. Importamos ChangeDetectorRef
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { jwtDecode } from 'jwt-decode'; 
+import { jwtDecode } from 'jwt-decode';
+import { finalize } from 'rxjs/operators'; // <--- IMPORTANTE: Necesario para el arreglo
 
-import { ProductosAdminComponent } from '../productos-admin/productos-admin'; 
-import { ClienteNuevoComponent } from '../cliente-nuevo/cliente-nuevo'; 
+import { ProductosAdminComponent } from '../productos-admin/productos-admin';
+import { ClienteNuevoComponent } from '../cliente-nuevo/cliente-nuevo';
 import { PanelMovimientosComponent } from '../panel-movs/panel-movs';
 
-import { ClienteService } from '../../services/clientes'; 
+import { ClienteService } from '../../services/clientes';
 import { AuthService } from '../../services/auth';
 import { Cliente, Producto } from '../../interfaces';
 
@@ -16,12 +17,12 @@ import { Cliente, Producto } from '../../interfaces';
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    ProductosAdminComponent, 
-    PanelMovimientosComponent, 
+    CommonModule,
+    ReactiveFormsModule,
+    ProductosAdminComponent,
+    PanelMovimientosComponent,
     ClienteNuevoComponent
-  ], 
+  ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
@@ -30,10 +31,10 @@ export class Dashboard implements OnInit {
   private clienteService = inject(ClienteService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private cd = inject(ChangeDetectorRef); // 2. Inyectamos el detector de cambios
+  private cd = inject(ChangeDetectorRef);
 
   // --- DATOS USUARIO ---
-  usuarioRol: string = ''; 
+  usuarioRol: string = '';
   usuarioNombre: string = '';
   usuarioId: number = 0;
 
@@ -41,13 +42,13 @@ export class Dashboard implements OnInit {
   seccionActiva: string = 'CAJA'; // Por defecto para Admin/Empleados
 
   // --- DATOS ---
-  miPerfilCliente: Cliente | null = null; 
-  clienteBuscado: Cliente | null = null; 
+  miPerfilCliente: Cliente | null = null;
+  clienteBuscado: Cliente | null = null;
   productoParaEditar: Producto | null = null;
 
   mensaje: string = '';
   tipoMensaje: 'success' | 'error' | '' = '';
-  loading: boolean = false; 
+  loading: boolean = false;
 
   searchForm: FormGroup = this.fb.group({
     dni: ['', [Validators.required, Validators.minLength(7)]]
@@ -62,10 +63,10 @@ export class Dashboard implements OnInit {
         console.log('🔑 Token Decodificado:', decoded);
 
         this.usuarioId = decoded.id;
-        this.usuarioNombre = decoded.username || decoded.nombre; 
+        this.usuarioNombre = decoded.username || decoded.nombre;
         
         // Convertimos a minúsculas por seguridad
-        this.usuarioRol = (decoded.rol || 'cliente').toLowerCase(); 
+        this.usuarioRol = (decoded.rol || 'cliente').toLowerCase();
 
         // --- LÓGICA EXCLUSIVA PARA CLIENTES ---
         if (this.usuarioRol === 'cliente') {
@@ -74,7 +75,7 @@ export class Dashboard implements OnInit {
           
           if (dniCliente) {
               console.log('🔎 Buscando perfil para DNI:', dniCliente);
-              this.cargarMiPerfil(dniCliente); 
+              this.cargarMiPerfil(dniCliente);
           } else {
               this.mostrarMensaje('Error: No se encontró DNI en tu sesión', 'error');
           }
@@ -92,7 +93,7 @@ export class Dashboard implements OnInit {
   // --- MÉTODOS DE NAVEGACIÓN (ADMIN/EMPLEADO) ---
   cambiarSeccion(seccion: string) {
     this.seccionActiva = seccion;
-    this.mensaje = ''; 
+    this.mensaje = '';
     
     if (seccion !== 'CAJA') {
         this.clienteBuscado = null;
@@ -105,15 +106,15 @@ export class Dashboard implements OnInit {
 
   irAEditarProducto(producto: Producto) {
     this.productoParaEditar = producto;
-    this.seccionActiva = 'NUEVO_SABOR'; 
+    this.seccionActiva = 'NUEVO_SABOR';
   }
 
   volverAListaProductos() {
     this.productoParaEditar = null;
-    this.seccionActiva = 'PRODUCTOS'; 
+    this.seccionActiva = 'PRODUCTOS';
   }
 
-  // --- LÓGICA DE CLIENTE (FIX "CARGANDO...") ---
+  // --- LÓGICA DE CLIENTE ---
   cargarMiPerfil(dni: string) {
     this.clienteService.getClienteByDni(dni).subscribe({
         next: (data) => {
@@ -121,8 +122,7 @@ export class Dashboard implements OnInit {
             
             if (data) {
                 this.miPerfilCliente = data;
-                // 3. Forzamos la actualización de la vista para quitar el "Cargando..."
-                this.cd.detectChanges(); 
+                this.cd.detectChanges();
             } else {
                 console.warn('⚠️ El backend devolvió datos vacíos');
             }
@@ -137,22 +137,31 @@ export class Dashboard implements OnInit {
   // --- LÓGICA CAJA (ADMIN) ---
   buscarCliente() {
     if (this.searchForm.invalid) return;
-    this.loading = true;
+
+    this.loading = true; // Prendemos el spinner
     this.mensaje = '';
     this.clienteBuscado = null;
     
     const dni = this.searchForm.value.dni;
 
-    this.clienteService.getClienteByDni(dni).subscribe({
-      next: (data: Cliente) => {
-        this.clienteBuscado = data;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-        this.mostrarMensaje('Cliente no encontrado.', 'error');
-      }
-    });
+    this.clienteService.getClienteByDni(dni)
+      .pipe(
+        // finalize asegura que el loading se apague SIEMPRE (éxito, error o caché)
+        finalize(() => {
+            this.loading = false;
+            this.cd.detectChanges(); // Forzamos actualización visual
+            console.log('🔄 Búsqueda finalizada');
+        })
+      )
+      .subscribe({
+        next: (data: Cliente) => {
+          this.clienteBuscado = data;
+        },
+        error: (err) => {
+          console.error(err); // Logueamos el error para debug
+          this.mostrarMensaje('Cliente no encontrado.', 'error');
+        }
+      });
   }
 
   onOperacionTerminada(msg: string) {
