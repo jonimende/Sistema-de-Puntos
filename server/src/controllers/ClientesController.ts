@@ -8,7 +8,7 @@ import { Op } from 'sequelize';
 export const getClienteByDni = async (req: Request, res: Response) => {
     const { id } = req.params; 
 
-    console.log('Controlador ejecutándose. Buscando DNI:', id); // Debug
+    console.log('Controlador ejecutándose. Buscando DNI:', id);
 
     try {
         const cliente = await Cliente.findOne({ where: { dni: id } });
@@ -18,8 +18,12 @@ export const getClienteByDni = async (req: Request, res: Response) => {
             return res.status(404).json({ msg: 'Cliente no encontrado' });
         }
 
-        console.log('Cliente encontrado, enviando...');
-        res.json(cliente);
+        console.log('Cliente encontrado, enviando objeto limpio...');
+        
+        // --- EL CAMBIO MÁGICO ---
+        // Usamos .toJSON() para enviar solo los datos y quitar 
+        // toda la basura interna de Sequelize que estaba colgando la petición.
+        res.json(cliente.toJSON());
 
     } catch (error) {
         console.error('Error en controlador:', error);
